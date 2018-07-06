@@ -140,6 +140,21 @@ client.on("message", function(message) {
 	//
 	
 	// EVERYTHING ELSE
+	if(message.content === "q" && message.author.id === authfile.owner) {
+		message.channel.send("Emergency shutdown initiated");process.exit();
+	}
+	
+	if(message.content === prefix + "time") message.channel.send(Date());
+	
+	if(message.content.includes("STAR PLATINUM") && message.author.id === authfile.owner) message.channel.send("https://vignette3.wikia.nocookie.net/jjba/images/9/9b/SPTW_Key_Art.png/revision/latest?cb=20160515054430");
+	
+	if(message.content === "ORA" && message.author.id === authfile.owner) message.channel.send("https://i.imgur.com/1wb4XCj.gif");
+	
+	if(message.content === "ZA WARUDO" && message.author.id == authfile.owner) {
+		message.channel.send(":stopwatch: Time has been stopped. :stopwatch:");
+		setTimeout(function(){ message.channel.send(":fast_forward: Time has begun to move again. :fast_forward:"); }, 11000);
+	}
+	
 	if(message.content.startsWith(prefix + "help")) {
 		read('help.txt', function(err, data) {
 			if(err) {
@@ -154,11 +169,6 @@ client.on("message", function(message) {
 		message.channel.send("\\o\\");
 	} else if(message.content === "\\o\\" && message.author.id !== authfile.bot) {
 		message.channel.send("/o/");
-	}
-	
-	if(message.content === "q" && message.author.id === authfile.owner) {
-		message.channel.send("Emergency shutdown initiated");
-		process.exit();
 	}
 	
 	if(message.content.startsWith(prefix + "av")) {
@@ -199,10 +209,6 @@ client.on("message", function(message) {
             message.reply("Usage: ``!setusername NAME``");
         }
     }
-	
-	if(message.content === prefix + "time") {
-		message.channel.send(Date());
-	}
 	
 	if(message.content.startsWith(prefix + "poll") && checkContains(message.content, ["minute", "second", "hour"]) && /\d/.test(message.content) && !message.content.includes("@everyone") && !message.content.includes("@here") && message.author.id == '155562672320937984') {
 		var pollentries = message.content.split(",");
@@ -251,14 +257,6 @@ client.on("message", function(message) {
 		} else {
 			message.channel.send("Error: The time interval was too long. The maximum poll time allowed is 7 days.");
 		}
-	}
-	
-	if(message.content.includes("STAR PLATINUM") && message.author.id === authfile.owner) {
-		message.channel.send("https://vignette3.wikia.nocookie.net/jjba/images/9/9b/SPTW_Key_Art.png/revision/latest?cb=20160515054430");
-	}
-	
-	if(message.content === "ORA" && message.author.id === authfile.owner) {
-		message.channel.send("https://i.imgur.com/1wb4XCj.gif");
 	}
 	
 	if(message.content.startsWith(prefix + "owo") && message.author.id !== authfile.bot) {
@@ -343,11 +341,6 @@ client.on("message", function(message) {
 			if(err) return void console.error(err + "\n" + message.content);
 			message.channel.send(resp.body);
 		});
-	}
-	
-	if(message.content === "ZA WARUDO" && message.author.id == authfile.owner) {
-		message.channel.send(":stopwatch: Time has been stopped. :stopwatch:")
-		setTimeout(function(){ message.channel.send(":fast_forward: Time has begun to move again. :fast_forward:"); }, 11000);
 	}
 	
 	if(message.content.startsWith(prefix + "pa") && message.author.id == authfile.owner && !piper.includes(message.content.substring(5))) {

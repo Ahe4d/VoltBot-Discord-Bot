@@ -1,0 +1,10 @@
+Prefix is `m!command`, commands include:
+`math expression` - Perform a calculation on a mathematical expression and temeprature conversion.
+`server` - Return the status of the minecraft server.
+`owo` - What's this?
+`birb` - Return pictures of blocklander birbs.
+`piper` - Piper.
+`av @user` or `avatar @user` - Returns a url to the specified mentioned users avatar.
+`time` - Return the current date and time in London.
+`poll question, time in minutes hours or seconds` - Start a discord poll with a specified time.
+`meow` - Returns a picture of a cat. Meow.

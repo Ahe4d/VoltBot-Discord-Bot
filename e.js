@@ -44,17 +44,17 @@ function checkContains(check_string, check_array) {
 
     return false;
 }
-function convertSeconds(seconds) {
-	time = seconds * 1000;
-	return time;
-}
-function convertMinutes(minutes) {
-	time = minutes * 60 * 1000;
-	return time;
-}
-function convertHours(hours) {
-	time = hours * 60 * 60 * 1000;
-	return time;
+function convertTime(mode, time) {
+    if (mode === 'seconds') {
+        timeConv = time * 1000;
+        return timeConv;
+    } else if (mode === 'minutes') {
+        timeConv = time * 60 * 1000;
+        return timeConv;
+    } else if (mode === 'hours') {
+        timeConv = time * 60 * 60 * 1000;
+        return timeConv;
+    }
 }
 function read(file, callback) {
     fs.readFile(file, 'utf8', function(err, data) {
@@ -213,11 +213,11 @@ client.on("message", function(message) {
 		var pollquestion = pollentries[0].substr(7).toLowerCase();
 		
 		if(pollentries[1].includes("second")) {
-			time = convertSeconds(parseInt(pollentries[1].match(/\d+/)[0]));
+			time = convertTime('seconds', parseInt(pollentries[1].match(/\d+/)[0]));
 		} else if(pollentries[1].includes("minute")) {
-			time = convertMinutes(parseInt(pollentries[1].match(/\d+/)[0]));
+			time = convertTime('minutes', parseInt(pollentries[1].match(/\d+/)[0]));
 		} else if(pollentries[1].includes("hour")) {
-			time = convertHours(parseInt(pollentries[1].match(/\d+/)[0]));
+			time = convertTime('hours', parseInt(pollentries[1].match(/\d+/)[0]));
 		}
 		
 		if(time <= 604800000) {

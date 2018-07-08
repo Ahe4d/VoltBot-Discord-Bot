@@ -350,7 +350,7 @@ client.on("message", function(message) {
 		message.reply("successfully added piper.");
 	}
 	
-	if((message.content.startsWith("!eval") || message.content.startsWith("!evalr")) && authfile.includes(message.author.id) && !message.content.includes("console") && !message.content.includes("exec") && !message.content.includes("@everyone") && !message.content.includes("@here")) {    
+	if((message.content.startsWith("!eval") || message.content.startsWith("!evalr")) && authfile.owner === message.author.id && !message.content.includes("console") && !message.content.includes("exec") && !message.content.includes("@everyone") && !message.content.includes("@here")) {    
 		try {
 			let evalData = eval(message.content.substr(6));
         

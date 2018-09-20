@@ -1,5 +1,5 @@
 const Discord = require("discord.js");
-const client = new Discord.Client({autoReconnect:true});
+var client = new Discord.Client({autoReconnect:true});
 var authfile = require("./auth.json");
 var piper = require("./data/piper.json");
 var addedchannels = require("./channel_permissions/addedchannels.json");
@@ -26,14 +26,16 @@ var mcIP = ''; // Your MC server IP
 var mcPort = 25565; // Your MC server port
 var randomCat = require('random-cat');
 var req = require('req-fast');
-var Twitter = require('twitter');
+/*var Twitter = require('twitter');
 var twclient = new Twitter({
 	consumer_key: authfile.consumer_key,
 	consumer_secret: authfile.consumer_secret,
 	access_token_key: authfile.access_token_key,
 	access_token_secret: authfile.access_token_secret
 });
-var stream = twclient.stream('statuses/filter', {follow: '169201749'});
+var stream = twclient.stream('statuses/filter', {follow: ''});*/
+const util = require('util');
+const orbanswers = ["It is certain.", "It is decidedly so.", "Without a doubt.", "Yes - definitely.", "You may rely on it.", "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.", "Reply hazy, try again", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "My reply is no.", "My sources say no", "Outlook not so good.", "Very doubtful."];
 
 // functions that do stuff
 function checkContains(check_string, check_array) {
@@ -74,7 +76,7 @@ function remove(array, element) {
     }
 }
 
-client.on("message", function(message) {
+client.on("message", async message => {
 	var input = message.content.toUpperCase();
 	
 	// SPAM COMMANDS - uses addedchannels.json to store channel ids
@@ -112,7 +114,7 @@ client.on("message", function(message) {
 			}
 
 			var options = {
-				url: "https://danbooru.donmai.us/posts.json?tags=cat_ears%20rating:safe%20score:%3E10&random=true&limit=1",
+				url: "https://danbooru.donmai.us/posts.json?tags=age%3A0h..24h+wool_%28miwol%29&random=false&limit=1",
 				headers: {
 					'User-Agent': 'Mozilla/5.0 (compatible; Yoshi-Bot/1.0; +http://github.com/MarioGraceZ22/Yoshi-Bot)'
 				}
@@ -133,8 +135,6 @@ client.on("message", function(message) {
 					console.log("error: " + error + "\nStatus code:" + response.statusCode);
 				}
 			});
-		} else if(message.content.startsWith(prefix + "cat") && !nsfw.includes(message.channel.id)) {
-			message.reply("This channel is not marked as nsfw!")
 		}
 	}
 	//
@@ -165,6 +165,10 @@ client.on("message", function(message) {
 		});
 	}
 	
+	if(message.content === prefix + "icon") {
+		message.channel.send("`" + message.guild.name + "'s icon:`" + message.guild.iconURL + "?size=2048");
+	}
+	
 	if(message.content === "/o/" && message.author.id !== authfile.bot) {
 		message.channel.send("\\o\\");
 	} else if(message.content === "\\o\\" && message.author.id !== authfile.bot) {
@@ -172,12 +176,46 @@ client.on("message", function(message) {
 	}
 	
 	if(message.content.startsWith(prefix + "av")) {
-	var mmentioned = message.mentions.users.array();
-		if(mmentioned.length === 0){
-			message.reply(message.author.avatarURL.replace("jpg", "png").replace("gif?size=2048", "gif").replace("gif?size=1024", "gif").replace("gif?size=512", "gif"));
-		} else if(mmentioned.length > 0) {
-			message.reply(mmentioned[0].avatarURL.replace("jpg", "png").replace("gif?size=2048", "gif").replace("gif?size=1024", "gif").replace("gif?size=512", "gif"));
+		var args = message.content.split(" ").splice(1).join(" ");
+		
+		// try to find the person by nickname; then username; then mentioned; and finally if all else fails, default to the message author
+		var person = message.guild.members.find(member => member.user.username.toLocaleLowerCase() === args.toLocaleLowerCase())
+		if (person === null) {
+			var person = message.guild.members.find(member => member.displayName.toLocaleLowerCase() === args.toLocaleLowerCase())
+			if (person === null) {
+				var person = message.guild.member(message.mentions.users.first())
+				if(person === null && args) {
+					var usersinserver = message.guild.members.array().map(people => people);
+					for(var i = 0; i < usersinserver.length; i++) {
+						if(usersinserver[i].user.username.toLocaleLowerCase().includes(args.toLocaleLowerCase()) || usersinserver[i].displayName.toLocaleLowerCase().includes(args.toLocaleLowerCase())) {
+							var person = usersinserver[i];
+						}
+					}
+				} if (person === null) {
+					var person = message.guild.member(message.author)
+				}
+			}
 		}
+		
+		// sorting the roles properly because discordjs doesn't do it
+		var roleposition = 0;
+		for(var i = 0; i < person.roles.array().length; i++) {
+			var lastrole = person.roles.array()[i];
+			
+			// assigning the role colour based on the users top role/name colour
+			if(lastrole.position > roleposition && lastrole.hexColor !== "#000000") {
+				roleposition = lastrole.position;
+				var rolecolour = lastrole.hexColor;
+			}
+		}
+		
+		// and then finally, make the embed
+		var embed = new Discord.RichEmbed()
+		.setTitle(person.user.username + "'s avatar").setURL(person.user.avatarURL)
+		.setAuthor(person.user.username, person.user.avatarURL)
+		.setColor(rolecolour)
+		.setImage(person.user.avatarURL);
+		message.channel.send({embed});
 	}
 	
 	if(message.content.startsWith(prefix + "math")) {            
@@ -189,8 +227,7 @@ client.on("message", function(message) {
 		}
 
 		try {
-			let mathanswer = math.round(math.eval(problem), 10);
-			message.reply(math.eval(mathanswer).toString());
+			message.reply(math.eval(problem).toString());
 		} catch(error) {
 			message.reply(rejectMessage);
 		}
@@ -228,15 +265,15 @@ client.on("message", function(message) {
 		
 		if(time <= 604800000) {
 			message.channel.send("**" + message.author + " started a poll:** " + pollquestion).then(message => {
-			message.react("👍");
+			message.react("ðŸ‘");
 			
 			setTimeout(() => {
-			message.react("👎");
+			message.react("ðŸ‘Ž");
 			},250);
 			
 			setTimeout(() => {
-			thumbsupreact = message.reactions.find(reaction => reaction.emoji.name === "👍").count - 1;
-			thumbsdownreact = message.reactions.find(reaction => reaction.emoji.name === "👎").count - 1;
+			thumbsupreact = message.reactions.find(reaction => reaction.emoji.name === "ðŸ‘").count - 1;
+			thumbsdownreact = message.reactions.find(reaction => reaction.emoji.name === "ðŸ‘Ž").count - 1;
 			message.delete();
 			
 			var result_firsthalf = "When asked **" + pollquestion + "**, people voted:\n" + thumbsupreact + " :thumbsup:\n" + thumbsdownreact + " :thumbsdown:";
@@ -259,6 +296,11 @@ client.on("message", function(message) {
 		}
 	}
 	
+	if(message.content.startsWith(prefix + "pick ")) {
+		let choices = message.content.substr(7).split("|");
+		message.reply("I pick **" + choices[Math.abs(Math.round(Math.random() * choices.length - 1))] + "**.");
+	}
+	
 	if(message.content.startsWith(prefix + "owo") && message.author.id !== authfile.bot) {
 		var owo = message.content.substr(5);
 		var endowo = ["owo", "uwu", "OwO", "OWO", "UwU", "UWU"];
@@ -276,19 +318,20 @@ client.on("message", function(message) {
 		owo = owo.replace("nyt",'nt');
 		owo = owo.replace("nye",'ne');
 		owo = owo.replace("nyk",'ny');
-		owo = owo.replace("any",'an');
+		owo = owo.replace("iny",'ing');
 		owo = owo.replace("nyny", "ny");
 		owo = owo.replace("ny'ny", "nyny");
+		owo = owo.replace(" iny ", " in ");
 		owo = owo.replace("y't", "'t");
-		owo = owo.replace("iony", "iony");
+		owo = owo.replace("iony", "ion");
 		owo = owo.replace("YY",'Y');
 		owo = owo.replace("NYG",'NG');
 		owo = owo.replace("NYT",'NT');
 		owo = owo.replace("NYE",'NR');
 		owo = owo.replace("ANY",'AN');
 		owo = owo.replace("NYNY", "NK");
+		owo = owo.replace(" INY ", " IN ");
 		owo = owo.replace("Y'T", "'T");
-		owo = owo.replace("NYK", "NY");
 		owo = owo.replace("NY'NY", "NYNY");
 		owo = owo.replace("IONY", "ION");
 		message.channel.send(owo + squiggle[math.abs(math.round(math.random() * squiggle.length - 1))] + " " + endowo[math.abs(math.round(math.random() * endowo.length - 1))]);
@@ -343,13 +386,6 @@ client.on("message", function(message) {
 		});
 	}
 	
-	if(message.content.startsWith(prefix + "pa") && message.author.id == authfile.owner && !piper.includes(message.content.substring(5))) {
-		message.delete();
-		piper.push(message.content.substring(5));
-		fs.writeFileSync("piper.json", JSON.stringify(piper));
-		message.reply("successfully added piper.");
-	}
-	
 	if((message.content.startsWith("!eval") || message.content.startsWith("!evalr")) && authfile.owner === message.author.id && !message.content.includes("console") && !message.content.includes("exec") && !message.content.includes("@everyone") && !message.content.includes("@here")) {    
 		try {
 			let evalData = eval(message.content.substr(6));
@@ -359,6 +395,14 @@ client.on("message", function(message) {
 		} catch(err) {
 			message.reply("```javascript" + "\n" + err + "```");
 		}
+	}
+	
+	// the orbs
+	if(message.content.startsWith(prefix + "orbs")) {
+		var orbanswerone = orbanswers[Math.round(Math.random() * (orbanswers.length - 1))];
+		var orbanswertwo = orbanswers[Math.round(Math.random() * (orbanswers.length - 1))];
+		var orbanswerthree = orbanswers[Math.round(Math.random() * (orbanswers.length - 1))];
+		message.channel.send(":black_circle:: " + orbanswerone + "\n:black_circle:: " + orbanswertwo + "\n:black_circle:: " + orbanswerthree)
 	}
 	
 	// This is for adding and removing channels from the spam, nsfw and stream commands, as well as toggling the stream command.
@@ -402,13 +446,13 @@ client.on("message", function(message) {
 	
 	if(message.content === prefix + "stream enable" && message.author.id == authfile.owner) {
 		streamchannels.enabled = true;
-		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels), function (err) {
+		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels.enabled), function (err) {
 			if (err) return console.log(err);
 			message.reply("successfully enabled the streaming service.");
 		});
 	} else if(message.content === prefix + "stream disable" && message.author.id == authfile.owner) {
 		streamchannels.enabled = false;
-		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels), function (err) {
+		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels.enabled), function (err) {
 			if (err) return console.log(err);
 			message.reply("successfully disabled the streaming service.");
 		});
@@ -420,32 +464,130 @@ client.on("message", function(message) {
 		streamchannels.channel === "" ? streamstatusreply += "but the stream channel is currently not set.":streamstatusreply += "stream channel is currently set to <#" + streamchannels.channel + ">";
 		message.reply(streamstatusreply);
 	}
+	
+	if(message.content.startsWith(prefix + "pa") && message.author.id == authfile.owner && !piper.includes(message.content.substring(5))) {
+		message.delete();
+		piper.push(message.content.substring(5));
+		fs.writeFileSync("piper.json", JSON.stringify(piper));
+		message.reply("successfully added piper.");
+	}
+	//
+	
+	// bit that makes the bot send messages between two discords
+	// checks if the message sender is the bot. we don't want it to be. Fuck he
+	if(message.author.id !== authfile.bot) {
+		var talkchannels = require('./channel_permissions/talkchannels.json');
+		// this is the code that sends messages between channels
+		if(talkchannels["first channel"] !== null && talkchannels["second channel"] !== null) {
+			var person = message.guild.member(message.author);
+			var roleposition = 0;
+			for(var i = 0; i < person.roles.array().length; i++) {
+				var lastrole = person.roles.array()[i];
+				
+				// assigning the role colour based on the users top role/name colour
+				if(lastrole.position > roleposition && lastrole.hexColor !== "#000000") {
+					roleposition = lastrole.position;
+					var rolecolour = lastrole.hexColor;
+				}
+			}
+			if(message.attachments.array().length > 0) {
+				var imageurl = message.attachments.array()[0].url;
+			} else {
+				var imageurl = '';
+			}
+			
+			var embed = new Discord.RichEmbed()
+			.setAuthor(person.user.username, person.user.avatarURL)
+			.setColor(rolecolour)
+			.setDescription(message.cleanContent)
+			.setImage(imageurl);
+			
+			if(message.channel.id === talkchannels["first channel"]) {
+				client.channels.get(talkchannels["second channel"]).send({embed});
+			} else if(message.channel.id === talkchannels["second channel"]) {
+				client.channels.get(talkchannels["first channel"]).send({embed});
+			}
+		}
+	}
+		
+		// this is the code for adding/removing them. it's so God Damn Long !
+		/*if(message.content.startsWith(prefix + "talkchannel add") && message.author.id == authfile.owner) {
+			var args = message.content.substr(18);
+			
+			switch(args) {
+				case '1':
+					talkchannels["first channel"] = message.channel.id;
+					break;
+				case '2':
+					talkchannels["second channel"] = message.channel.id;
+					break;
+				default:
+					message.channel.send('No channel specified!');
+			}
+			fs.writeFile('talkchannels.json', JSON.stringify(talkchannels, null, 2), function (err) {
+				if (err) return console.log(err);
+				console.log(JSON.stringify(talkchannels, null, 2));
+				console.log('writing to talkchannels.json');
+			});
+		}
+			
+		if(message.content.startsWith(prefix + "talkchannel remove") && message.author.id == authfile.owner) {
+			var args = message.content.substr(18);
+			
+			switch(args) {
+				case '1':
+					talkchannels["first channel"] = '';
+					break;
+				case '2':
+					talkchannels["second channel"] = '';
+					break;
+				default:
+					message.channel.send('No channel specified!');
+			}
+			fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels, null, 2));
+		}
+			
+		if(message.content.startsWith(prefix + "talkchannel reset") && message.author.id == authfile.owner) {
+			talkchannels["first channel"] = '';
+			talkchannels["first channel"] = '';
+			fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels, null, 2));
+		}
+	}*/
 	//
 });
 
 // STREAM EVENTS - uses streamchannels.json to store a channel id
-stream.on('data', event => {
+/*stream.on('data', event => {
 	if(streamchannels.enabled === true) {
-		if(!event.extended_entities.media[0].media_url.includes("video") && event.extended_entities !== undefined) {
+		if(!event.extended_entities.media[0].media_url.includes("video") && event.extended_entities) {
 			try {
-				client.channels.get(streamchannels.channel).send(event.extended_entities.media[0].media_url + ":orig");
+				var embed = new Discord.RichEmbed();
+				embed.setColor(event.user.profile_link_color);
+				embed.setAuthor(event.user.name + " (@" + event.user.screen_name + ")", event.user.profile_image_url, "https://twitter.com/" + event.user.screen_name);
+				embed.setDescription(event.text);
+				
+				if (event.extended_entities) {
+					embed.setImage(event.extended_entities.media[0].media_url);
+				}
+				
+				embed.setTimestamp();
+				client.channels.get(streamchannels.channel).send("", {embed: embed});
 			} catch(er) {
 				console.log(er);
 			}
 		}
 	}
-});
-//
+});*/
 
 process.on('uncaughtException', function (err) {
 	var d = new Date(); // for now
 	d.getHours();
 	d.getMinutes();
-	console.log('Caught exception: ' + err + ' at ' + d);
+	console.log(util.inspect(err));
 });
 
 client.login(authfile.authkey).then(function() {
 	console.log("successfully logged in");
 }).catch(function (error) {
 	console.log(error);
-});
+})

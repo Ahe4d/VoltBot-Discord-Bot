@@ -3,7 +3,7 @@ var client = new Discord.Client({autoReconnect:true});
 var authfile = require("./auth.json");
 var piper = require("./data/piper.json");
 var addedchannels = require("./channel_permissions/addedchannels.json");
-var nsfw = require("././channel_permissions/nsfwchannels.json");
+var nsfw = require("./channel_permissions/nsfwchannels.json");
 var streamchannels = require("./channel_permissions/streamchannels.json");
 var fs = require("fs");
 const math = require("mathjs"),
@@ -36,6 +36,7 @@ var twclient = new Twitter({
 var stream = twclient.stream('statuses/filter', {follow: ''});*/
 const util = require('util');
 const orbanswers = ["It is certain.", "It is decidedly so.", "Without a doubt.", "Yes - definitely.", "You may rely on it.", "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.", "Reply hazy, try again", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "My reply is no.", "My sources say no", "Outlook not so good.", "Very doubtful."];
+var talkchannels = require('./channel_permissions/talkchannels.json');
 
 // functions that do stuff
 function checkContains(check_string, check_array) {
@@ -85,9 +86,8 @@ client.on("message", async message => {
 			message.channel.send("piper");
 		}
 		
-		if(message.content === prefix + "piper") {
-		message.reply(piper[Math.floor(Math.random() * piper.length)]);
-		}
+        if(message.content === prefix + "piper") 
+            message.reply(piper[Math.floor(Math.random() * piper.length)]);
 		
 		if(message.content.toUpperCase().replace(/[.,\/#!?$%\^&\*;:{}=\-_`~()]/g, "") === "E" && message.author.id !== authfile.bot) {
 			message.channel.send(message.content);
@@ -476,9 +476,9 @@ client.on("message", async message => {
 	// bit that makes the bot send messages between two discords
 	// checks if the message sender is the bot. we don't want it to be. Fuck he
 	if(message.author.id !== authfile.bot) {
-		var talkchannels = require('./channel_permissions/talkchannels.json');
 		// this is the code that sends messages between channels
-		if(talkchannels["first channel"] !== null && talkchannels["second channel"] !== null) {
+		if(talkchannels.includes(message.channel.id)) {
+			var urlRegex = /(\b(?:(?:https?)|(?:ftp)|(?:file)):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*(?:(?:\.jpg)|(?:\.jpeg)|(?:\.png)|(?:\.gif)))/ig;
 			var person = message.guild.member(message.author);
 			var roleposition = 0;
 			for(var i = 0; i < person.roles.array().length; i++) {
@@ -492,6 +492,8 @@ client.on("message", async message => {
 			}
 			if(message.attachments.array().length > 0) {
 				var imageurl = message.attachments.array()[0].url;
+			} else if(message.cleanContent.match(urlRegex) !== null) {
+				var imageurl = message.cleanContent.match(urlRegex)[0];
 			} else {
 				var imageurl = '';
 			}
@@ -500,59 +502,33 @@ client.on("message", async message => {
 			.setAuthor(person.user.username, person.user.avatarURL)
 			.setColor(rolecolour)
 			.setDescription(message.cleanContent)
+			.setFooter("Sent from #" + message.channel.name + " in " + message.guild.name)
 			.setImage(imageurl);
-			
-			if(message.channel.id === talkchannels["first channel"]) {
-				client.channels.get(talkchannels["second channel"]).send({embed});
-			} else if(message.channel.id === talkchannels["second channel"]) {
-				client.channels.get(talkchannels["first channel"]).send({embed});
+				
+			for(var j in talkchannels) {
+				if(talkchannels[j] !== message.channel.id) {
+					client.channels.get(talkchannels[j]).send({embed});
+				}
 			}
 		}
 	}
 		
-		// this is the code for adding/removing them. it's so God Damn Long !
-		/*if(message.content.startsWith(prefix + "talkchannel add") && message.author.id == authfile.owner) {
-			var args = message.content.substr(18);
-			
-			switch(args) {
-				case '1':
-					talkchannels["first channel"] = message.channel.id;
-					break;
-				case '2':
-					talkchannels["second channel"] = message.channel.id;
-					break;
-				default:
-					message.channel.send('No channel specified!');
-			}
-			fs.writeFile('talkchannels.json', JSON.stringify(talkchannels, null, 2), function (err) {
-				if (err) return console.log(err);
-				console.log(JSON.stringify(talkchannels, null, 2));
-				console.log('writing to talkchannels.json');
-			});
+	// this is the code for adding/removing them. it's so God Damn Short !
+	if(message.content === prefix + "addchannel talk" && message.author.id === authfile.owner && !talkchannels.includes(message.channel.id)) {
+		talkchannels.push(message.channel.id);
+		fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels));
+		message.reply("successfully added channel to talk.");
+	} else if(message.content === prefix + "removechannel talk" && message.author.id === authfile.owner && talkchannels.includes(message.channel.id)) {
+		talkchannels.splice(message.channel.id);
+		fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels));
+		message.reply("successfully removed channel from talk.");
+	} else if(message.content === prefix + "resetchannels talk" && message.author.id === authfile.owner) {
+		for(var k = 0; k <= talkchannels; k++) {
+			talkchannels.splice[k];
 		}
-			
-		if(message.content.startsWith(prefix + "talkchannel remove") && message.author.id == authfile.owner) {
-			var args = message.content.substr(18);
-			
-			switch(args) {
-				case '1':
-					talkchannels["first channel"] = '';
-					break;
-				case '2':
-					talkchannels["second channel"] = '';
-					break;
-				default:
-					message.channel.send('No channel specified!');
-			}
-			fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels, null, 2));
-		}
-			
-		if(message.content.startsWith(prefix + "talkchannel reset") && message.author.id == authfile.owner) {
-			talkchannels["first channel"] = '';
-			talkchannels["first channel"] = '';
-			fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels, null, 2));
-		}
-	}*/
+		fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels));
+		message.reply("successfully removed every channel from talk.");
+	}
 	//
 });
 

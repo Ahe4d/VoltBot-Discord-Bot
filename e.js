@@ -24,7 +24,6 @@ var prefix = "m!";
 var request = require('request');
 var mcIP = ''; // Your MC server IP
 var mcPort = 25565; // Your MC server port
-var randomCat = require('random-cat');
 var req = require('req-fast');
 /*var Twitter = require('twitter');
 var twclient = new Twitter({
@@ -76,6 +75,7 @@ function remove(array, element) {
 		return array;
     }
 }
+var minecraftservers = ["167729387381325825"];
 
 client.on("message", async message => {
 	var input = message.content.toUpperCase();
@@ -97,11 +97,10 @@ client.on("message", async message => {
 			}
 		}
 	}
-	//
 	
 	// NSFW COMMANDS - uses nsfw.json to store channels ids
 	if(nsfw.includes(message.channel.id)) {
-		if(message.content.startsWith(prefix + "cat")) {
+		if(message.content.startsWith(prefix + "touhou")) {
 			function shuffle(sourceArray) {
 				for (var i = 0; i < sourceArray.length - 1; i++) {
 					var j = i + Math.floor(Math.random() * (sourceArray.length - i));
@@ -114,7 +113,7 @@ client.on("message", async message => {
 			}
 
 			var options = {
-				url: "https://danbooru.donmai.us/posts.json?tags=age%3A0h..24h+wool_%28miwol%29&random=false&limit=1",
+				url: "https://danbooru.donmai.us/posts.json?tags=touhou+rating:safe&random=false&limit=1",
 				headers: {
 					'User-Agent': 'Mozilla/5.0 (compatible; Yoshi-Bot/1.0; +http://github.com/MarioGraceZ22/Yoshi-Bot)'
 				}
@@ -137,7 +136,6 @@ client.on("message", async message => {
 			});
 		}
 	}
-	//
 	
 	// EVERYTHING ELSE
 	if(message.content === "q" && message.author.id === authfile.owner) {
@@ -166,7 +164,7 @@ client.on("message", async message => {
 	}
 	
 	if(message.content === prefix + "icon") {
-		message.channel.send("`" + message.guild.name + "'s icon:`" + message.guild.iconURL + "?size=2048");
+		message.channel.send("`" + message.guild.name + "`'s icon:" + message.guild.iconURL + "?size=2048");
 	}
 	
 	if(message.content === "/o/" && message.author.id !== authfile.bot) {
@@ -209,17 +207,26 @@ client.on("message", async message => {
 			}
 		}
 		
+		// get the author and their nickname if they have one
+		if(person.nickname !== null) {
+			var avatarholder = person.user.tag + " (" + person.nickname + ")";
+		} else {
+			var avatarholder = person.user.tag;
+		}
+			
 		// and then finally, make the embed
 		var embed = new Discord.RichEmbed()
-		.setTitle(person.user.username + "'s avatar").setURL(person.user.avatarURL)
-		.setAuthor(person.user.username, person.user.avatarURL)
+		.setTitle(person.user.username + "'s avatar").setURL(person.user.displayAvatarURL)
+		.setAuthor(avatarholder, person.user.displayAvatarURL)
 		.setColor(rolecolour)
-		.setImage(person.user.avatarURL);
+		.setImage(person.user.displayAvatarURL);
 		message.channel.send({embed});
 	}
 	
-	if(message.content.startsWith(prefix + "math")) {            
-		var problem = message.content.substr(7).replace("Fahrenheit", "fahrenheit").replace("arenheit", "ahrenheit").replace("arhenheit", "ahrenheit").replace("Celsius", "celsius").replace("elcius", "elsius");
+	if(message.content.startsWith(prefix + "m")) {
+		var args = message.content.split(" ").splice(1).join(" ");
+		
+		var problem = args.replace("Fahrenheit", "fahrenheit").replace("arenheit", "ahrenheit").replace("arhenheit", "ahrenheit").replace("Celsius", "celsius").replace("elcius", "elsius");
 		
 		for(var i = 0; i < keywords.length; ++i) {
 			if(problem.includes(keywords[i]))
@@ -231,6 +238,11 @@ client.on("message", async message => {
 		} catch(error) {
 			message.reply(rejectMessage);
 		}
+	}
+	
+	if(message.content === prefix + "ping") {
+		const m = await message.channel.send("Ping?");
+		m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
 	}
 	
 	if(message.content.startsWith(prefix + "username") && message.author.id == authfile.owner) {
@@ -265,15 +277,15 @@ client.on("message", async message => {
 		
 		if(time <= 604800000) {
 			message.channel.send("**" + message.author + " started a poll:** " + pollquestion).then(message => {
-			message.react("ðŸ‘");
+			message.react(`ðŸ‘`);
 			
 			setTimeout(() => {
-			message.react("ðŸ‘Ž");
+			message.react(`ðŸ‘Ž`);
 			},250);
 			
 			setTimeout(() => {
-			thumbsupreact = message.reactions.find(reaction => reaction.emoji.name === "ðŸ‘").count - 1;
-			thumbsdownreact = message.reactions.find(reaction => reaction.emoji.name === "ðŸ‘Ž").count - 1;
+			thumbsupreact = message.reactions.find(reaction => reaction.emoji.name === `ðŸ‘`).count - 1;
+			thumbsdownreact = message.reactions.find(reaction => reaction.emoji.name === `ðŸ‘Ž`).count - 1;
 			message.delete();
 			
 			var result_firsthalf = "When asked **" + pollquestion + "**, people voted:\n" + thumbsupreact + " :thumbsup:\n" + thumbsdownreact + " :thumbsdown:";
@@ -338,7 +350,7 @@ client.on("message", async message => {
 	}
 	
 	// useful command for checking the status of a minecraft server
-	if (message.content === (prefix + "server")) {
+	if (message.content === (prefix + "status") && minecraftservers.includes(message.guild.id)) {
         var url = 'http://mcapi.us/server/status?ip=' + mcIP + '&port=' + mcPort;
         request(url, function(err, response, body) {
             if(err) {
@@ -348,7 +360,7 @@ client.on("message", async message => {
             body = JSON.parse(body);
             var status = ':x: **' + mcIP + ':' + mcPort + '** | *Minecraft server is currently offline*';
             if(body.online) {
-                status = ':white_check_mark: **' + mcIP + ':' + mcPort + '** | **Minecraft** server is **online**  -  ';
+                status = ':white_check_mark: **' + mcIP + ':' + mcPort + '** | The server is **online**  -  ';
                 if(body.players.now) {
                     status += '**' + body.players.now + '** people are playing!';
                 } else {
@@ -358,7 +370,6 @@ client.on("message", async message => {
             message.reply(status);
         });
     }
-	//
 	
 	// the holy grail; the 
 	if (message.content === (prefix + "birb")) {
@@ -377,14 +388,6 @@ client.on("message", async message => {
             }
         });
     }
-	//
-	
-	if(message.content === prefix + "meow") {
-		req("http://random.cat/meow", (err, resp) => {
-			if(err) return void console.error(err + "\n" + message.content);
-			message.channel.send(resp.body);
-		});
-	}
 	
 	if((message.content.startsWith("!eval") || message.content.startsWith("!evalr")) && authfile.owner === message.author.id && !message.content.includes("console") && !message.content.includes("exec") && !message.content.includes("@everyone") && !message.content.includes("@here")) {    
 		try {
@@ -444,6 +447,36 @@ client.on("message", async message => {
 		});
 	}
 	
+	// command for viewing and leaving servers
+	if(message.content.startsWith(prefix + "servers") && message.author.id === authfile.owner) {
+		let args = message.content.split(" ").splice(1).join(" ");
+		let server_array = client.guilds.array();
+		
+		// the listing part
+		if(args.startsWith("list")) {
+			let list = "";
+			// runs through the array of servers the bot's currently in and
+			// appends them to the output variable
+			server_array.forEach(server => {
+				list += (server_array.indexOf(server) + 1).toString() + ") " + server + "\n";
+			});
+			// then we send that output variable
+			message.channel.send("```" + list + "```");
+		}
+		
+		// the leaving part
+		if(args.startsWith("leave ")) {
+			// get the indexed server from the message and parse it as an int
+			let serverindx = parseInt(args.substr(6));
+			// check if the index isn't negative or bigger than the array
+			if(serverindx > 0 && serverindx <= server_array.length) {
+				serverindx -= 1;
+				// leave the server
+				server_array[serverindx].leave();
+			}
+		}
+	}
+	
 	if(message.content === prefix + "stream enable" && message.author.id == authfile.owner) {
 		streamchannels.enabled = true;
 		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels.enabled), function (err) {
@@ -473,9 +506,10 @@ client.on("message", async message => {
 	}
 	//
 	
+	//			== DEPCRECATED TALKCHANNEL FEATURE ==
 	// bit that makes the bot send messages between two discords
 	// checks if the message sender is the bot. we don't want it to be. Fuck he
-	if(message.author.id !== authfile.bot) {
+	/*if(message.author.id !== authfile.bot) {
 		// this is the code that sends messages between channels
 		if(talkchannels.includes(message.channel.id)) {
 			var urlRegex = /(\b(?:(?:https?)|(?:ftp)|(?:file)):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*(?:(?:\.jpg)|(?:\.jpeg)|(?:\.png)|(?:\.gif)))/ig;
@@ -490,28 +524,44 @@ client.on("message", async message => {
 					var rolecolour = lastrole.hexColor;
 				}
 			}
+
+			// this part grabs an image url from the message, either from
+			// attachment or the image url itself
 			if(message.attachments.array().length > 0) {
-				var imageurl = message.attachments.array()[0].url;
+				var embedurl = message.attachments.array()[0].url;
 			} else if(message.cleanContent.match(urlRegex) !== null) {
-				var imageurl = message.cleanContent.match(urlRegex)[0];
+				var embedurl = message.cleanContent.match(urlRegex)[0];
 			} else {
-				var imageurl = '';
+				var embedurl = '';
+			}
+			if(person.nickname !== null) {
+				var crosslinkauthor = person.user.tag + " (" + person.nickname + ")";
+			} else {
+				var crosslinkauthor = person.user.tag;
+			}
+			
+			// make the message content without any duplications
+			var finalmessagecontent = message.cleanContent;
+			if(finalmessagecontent.includes(embedurl)) {
+				finalmessagecontent = message.cleanContent;
+			} else {
+				finalmessagecontent = message.cleanContent + " " + embedurl;
 			}
 			
 			var embed = new Discord.RichEmbed()
-			.setAuthor(person.user.username, person.user.avatarURL)
+			.setAuthor(crosslinkauthor, person.user.displayAvatarURL)
 			.setColor(rolecolour)
-			.setDescription(message.cleanContent)
-			.setFooter("Sent from #" + message.channel.name + " in " + message.guild.name)
-			.setImage(imageurl);
-				
+			.setDescription(finalmessagecontent)
+			.setImage(embedurl)
+			.setFooter("Sent from #" + message.channel.name + " in " + message.guild.name);
+		
 			for(var j in talkchannels) {
 				if(talkchannels[j] !== message.channel.id) {
 					client.channels.get(talkchannels[j]).send({embed});
 				}
 			}
 		}
-	}
+	}*/
 		
 	// this is the code for adding/removing them. it's so God Damn Short !
 	if(message.content === prefix + "addchannel talk" && message.author.id === authfile.owner && !talkchannels.includes(message.channel.id)) {
@@ -529,7 +579,6 @@ client.on("message", async message => {
 		fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels));
 		message.reply("successfully removed every channel from talk.");
 	}
-	//
 });
 
 // STREAM EVENTS - uses streamchannels.json to store a channel id
@@ -547,7 +596,7 @@ client.on("message", async message => {
 				}
 				
 				embed.setTimestamp();
-				client.channels.get(streamchannels.channel).send("", {embed: embed});
+				client.channels.get(streamchannels.channel).send({embed});
 			} catch(er) {
 				console.log(er);
 			}
@@ -566,4 +615,9 @@ client.login(authfile.authkey).then(function() {
 	console.log("successfully logged in");
 }).catch(function (error) {
 	console.log(error);
-})
+});
+
+client.on('error', (error) => {
+	console.error(new Date() + " Discord Client encountered an error");
+	console.error(error);
+});

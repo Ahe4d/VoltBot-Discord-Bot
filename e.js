@@ -2,9 +2,9 @@ const Discord = require("discord.js");
 var client = new Discord.Client({autoReconnect:true});
 var authfile = require("./auth.json");
 var piper = require("./data/piper.json");
-var addedchannels = require("./channel_permissions/addedchannels.json");
-var nsfw = require("./channel_permissions/nsfwchannels.json");
-var streamchannels = require("./channel_permissions/streamchannels.json");
+var addedchannels = require("./data/addedchannels.json");
+var nsfw = require("./data/nsfwchannels.json");
+var streamchannels = require("./data/streamchannels.json");
 var fs = require("fs");
 const math = require("mathjs"),
     keywords = [
@@ -22,7 +22,7 @@ const math = require("mathjs"),
     rejectMessage = "Invalid equation.";
 var prefix = "m!";
 var request = require('request');
-var minecraft = require("./channel_permissions/minecraft.json");
+var minecraft = require("./data/minecraft.json");
 var req = require('req-fast');
 /*var Twitter = require('twitter');
 var twclient = new Twitter({
@@ -34,7 +34,7 @@ var twclient = new Twitter({
 var stream = twclient.stream('statuses/filter', {follow: ''});*/
 const util = require('util');
 const orbanswers = ["It is certain.", "It is decidedly so.", "Without a doubt.", "Yes - definitely.", "You may rely on it.", "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.", "Reply hazy, try again", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "My reply is no.", "My sources say no", "Outlook not so good.", "Very doubtful."];
-var talkchannels = require('./channel_permissions/talkchannels.json');
+var talkchannels = require('./data/talkchannels.json');
 
 // functions that do stuff
 function checkContains(check_string, check_array) {

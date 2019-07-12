@@ -24,6 +24,7 @@ var prefix = "m!";
 var request = require('request');
 var mcIP = ''; // Your MC server IP
 var mcPort = 25565; // Your MC server port
+var minecraft_discordserver = [""];
 var req = require('req-fast');
 /*var Twitter = require('twitter');
 var twclient = new Twitter({
@@ -75,7 +76,6 @@ function remove(array, element) {
 		return array;
     }
 }
-var minecraftservers = ["167729387381325825"];
 
 client.on("message", async message => {
 	var input = message.content.toUpperCase();
@@ -350,7 +350,7 @@ client.on("message", async message => {
 	}
 	
 	// useful command for checking the status of a minecraft server
-	if (message.content === (prefix + "status") && minecraftservers.includes(message.guild.id)) {
+	if (message.content === (prefix + "status") && minecraft_discordserver.includes(message.guild.id)) {
         var url = 'http://mcapi.us/server/status?ip=' + mcIP + '&port=' + mcPort;
         request(url, function(err, response, body) {
             if(err) {
@@ -384,7 +384,9 @@ client.on("message", async message => {
             body = JSON.parse(body);
 			
             if(body) {
-				message.reply("https://random.birb.pw/img/" + body.file);
+				let embed = new Discord.RichEmbed()
+				.setImage("https://random.birb.pw/img/" + body.file);
+				message.reply({embed});
             }
         });
     }

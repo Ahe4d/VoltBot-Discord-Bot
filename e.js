@@ -22,9 +22,7 @@ const math = require("mathjs"),
     rejectMessage = "Invalid equation.";
 var prefix = "m!";
 var request = require('request');
-var mcIP = ''; // Your MC server IP
-var mcPort = 25565; // Your MC server port
-var minecraft_discordserver = [""];
+var minecraft = require("./channel_permissions/minecraft.json");
 var req = require('req-fast');
 /*var Twitter = require('twitter');
 var twclient = new Twitter({
@@ -350,17 +348,18 @@ client.on("message", async message => {
 	}
 	
 	// useful command for checking the status of a minecraft server
-	if (message.content === (prefix + "status") && minecraft_discordserver.includes(message.guild.id)) {
-        var url = 'http://mcapi.us/server/status?ip=' + mcIP + '&port=' + mcPort;
+	if (message.content === (prefix + "status") && minecraft.minecraft_discordserver.includes(message.guild.id)) {
+        var url = 'http://mcapi.us/server/status?ip=' + minecraft.mcIP + '&port=' + minecraft.mcPort;
         request(url, function(err, response, body) {
-            if(err) {
-                console.log(err);
-                return message.reply('Error getting Minecraft server status...');
+            if(err || minecraft.mcIP === "") {
+                return message.reply('Error getting Minecraft server status');
             }
+			
             body = JSON.parse(body);
-            var status = ':x: **' + mcIP + ':' + mcPort + '** | *Minecraft server is currently offline*';
+            var status = ':x: **' + minecraft.mcIP + ':' + minecraft.mcPort + '** | *Minecraft server is currently offline*';
+			
             if(body.online) {
-                status = ':white_check_mark: **' + mcIP + ':' + mcPort + '** | The server is **online**  -  ';
+                status = ':white_check_mark: **' + minecraft.mcIP + ':' + minecraft.mcPort + '** | The server is **online**  -  ';
                 if(body.players.now) {
                     status += '**' + body.players.now + '** people are playing!';
                 } else {

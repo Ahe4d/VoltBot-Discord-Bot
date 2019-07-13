@@ -1,11 +1,12 @@
 const Discord = require("discord.js");
-var client = new Discord.Client({autoReconnect:true});
+const client = new Discord.Client({autoReconnect:true});
 var config = require("./data/config.json");
 var piper = require("./data/piper.json");
 var addedchannels = require("./data/addedchannels.json");
 var nsfw = require("./data/nsfwchannels.json");
 var streamchannels = require("./data/streamchannels.json");
-var fs = require("fs");
+var talkchannels = require('./data/talkchannels.json');
+const fs = require("fs");
 const math = require("mathjs"),
     keywords = [
         "constructor",
@@ -20,13 +21,12 @@ const math = require("mathjs"),
         "require"
     ],
     rejectMessage = "Invalid equation.";
-var request = require('request');
+const request = require('request');
 var minecraft = require("./data/minecraft.json");
-var req = require('req-fast');
+const req = require('req-fast');
 const util = require('util');
-const orbanswers = ["It is certain.", "It is decidedly so.", "Without a doubt.", "Yes - definitely.", "You may rely on it.", "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.", "Reply hazy, try again", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "My reply is no.", "My sources say no", "Outlook not so good.", "Very doubtful."];
-var talkchannels = require('./data/talkchannels.json');
-var prefix = config.prefix
+const orbanswers = require("./data/orbanswers.json");
+const prefix = config.prefix;
 /*var Twitter = require('twitter');
 var twclient = new Twitter({
 	consumer_key: config.consumer_key,
@@ -611,11 +611,8 @@ client.on("message", async message => {
 	}
 });*/
 
-process.on('uncaughtException', function (err) {
-	var d = new Date(); // for now
-	d.getHours();
-	d.getMinutes();
-	console.log(util.inspect(err));
+process.on('uncaughtException', (reason, promise) => {
+	console.log('Unhandled Rejection at:', reason.stack || reason)
 });
 
 client.login(config.authkey).then(function() {

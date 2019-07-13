@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
 var client = new Discord.Client({autoReconnect:true});
-var authfile = require("./auth.json");
+var config = require("./data/config.json");
 var piper = require("./data/piper.json");
 var addedchannels = require("./data/addedchannels.json");
 var nsfw = require("./data/nsfwchannels.json");
@@ -20,21 +20,21 @@ const math = require("mathjs"),
         "require"
     ],
     rejectMessage = "Invalid equation.";
-var prefix = "m!";
 var request = require('request');
 var minecraft = require("./data/minecraft.json");
 var req = require('req-fast');
-/*var Twitter = require('twitter');
-var twclient = new Twitter({
-	consumer_key: authfile.consumer_key,
-	consumer_secret: authfile.consumer_secret,
-	access_token_key: authfile.access_token_key,
-	access_token_secret: authfile.access_token_secret
-});
-var stream = twclient.stream('statuses/filter', {follow: ''});*/
 const util = require('util');
 const orbanswers = ["It is certain.", "It is decidedly so.", "Without a doubt.", "Yes - definitely.", "You may rely on it.", "As I see it, yes.", "Most likely.", "Outlook good.", "Yes.", "Signs point to yes.", "Reply hazy, try again", "Ask again later.", "Better not tell you now.", "Cannot predict now.", "Concentrate and ask again.", "Don't count on it.", "My reply is no.", "My sources say no", "Outlook not so good.", "Very doubtful."];
 var talkchannels = require('./data/talkchannels.json');
+var prefix = config.prefix
+/*var Twitter = require('twitter');
+var twclient = new Twitter({
+	consumer_key: config.consumer_key,
+	consumer_secret: config.consumer_secret,
+	access_token_key: config.access_token_key,
+	access_token_secret: config.access_token_secret
+});
+var stream = twclient.stream('statuses/filter', {follow: ''});*/
 
 // functions that do stuff
 function checkContains(check_string, check_array) {
@@ -80,14 +80,14 @@ client.on("message", async message => {
 	
 	// SPAM COMMANDS - uses addedchannels.json to store channel ids
 	if(addedchannels.includes(message.channel.id)) {
-		if(input.includes("PIPER") && message.author.id !== authfile.bot && !message.content.includes(prefix + "piper")) {
+		if(input.includes("PIPER") && message.author.id !== config.bot && !message.content.includes(prefix + "piper")) {
 			message.channel.send("piper");
 		}
 		
         if(message.content === prefix + "piper") 
             message.reply(piper[Math.floor(Math.random() * piper.length)]);
 		
-		if(message.content.toUpperCase().replace(/[.,\/#!?$%\^&\*;:{}=\-_`~()]/g, "") === "E" && message.author.id !== authfile.bot) {
+		if(message.content.toUpperCase().replace(/[.,\/#!?$%\^&\*;:{}=\-_`~()]/g, "") === "E" && message.author.id !== config.bot) {
 			message.channel.send(message.content);
 			var ranchanse = Math.floor(Math.random() * 500);
 			if(ranchanse === 25) {
@@ -136,17 +136,17 @@ client.on("message", async message => {
 	}
 	
 	// EVERYTHING ELSE
-	if(message.content === "q" && message.author.id === authfile.owner) {
+	if(message.content === "q" && message.author.id === config.owner) {
 		message.channel.send("Emergency shutdown initiated");process.exit();
 	}
 	
 	if(message.content === prefix + "time") message.channel.send(Date());
 	
-	if(message.content.includes("STAR PLATINUM") && message.author.id === authfile.owner) message.channel.send("https://vignette3.wikia.nocookie.net/jjba/images/9/9b/SPTW_Key_Art.png/revision/latest?cb=20160515054430");
+	if(message.content.includes("STAR PLATINUM") && message.author.id === config.owner) message.channel.send("https://vignette3.wikia.nocookie.net/jjba/images/9/9b/SPTW_Key_Art.png/revision/latest?cb=20160515054430");
 	
-	if(message.content === "ORA" && message.author.id === authfile.owner) message.channel.send("https://i.imgur.com/1wb4XCj.gif");
+	if(message.content === "ORA" && message.author.id === config.owner) message.channel.send("https://i.imgur.com/1wb4XCj.gif");
 	
-	if(message.content === "ZA WARUDO" && message.author.id == authfile.owner) {
+	if(message.content === "ZA WARUDO" && message.author.id == config.owner) {
 		message.channel.send(":stopwatch: Time has been stopped. :stopwatch:");
 		setTimeout(function(){ message.channel.send(":fast_forward: Time has begun to move again. :fast_forward:"); }, 11000);
 	}
@@ -165,9 +165,9 @@ client.on("message", async message => {
 		message.channel.send("`" + message.guild.name + "`'s icon:" + message.guild.iconURL + "?size=2048");
 	}
 	
-	if(message.content === "/o/" && message.author.id !== authfile.bot) {
+	if(message.content === "/o/" && message.author.id !== config.bot) {
 		message.channel.send("\\o\\");
-	} else if(message.content === "\\o\\" && message.author.id !== authfile.bot) {
+	} else if(message.content === "\\o\\" && message.author.id !== config.bot) {
 		message.channel.send("/o/");
 	}
 	
@@ -243,7 +243,7 @@ client.on("message", async message => {
 		m.edit(`Pong! Latency is ${m.createdTimestamp - message.createdTimestamp}ms. API Latency is ${Math.round(client.ping)}ms`);
 	}
 	
-	if(message.content.startsWith(prefix + "username") && message.author.id == authfile.owner) {
+	if(message.content.startsWith(prefix + "username") && message.author.id == config.owner) {
         var username = message.content.substr(11);
         
         if(username) {
@@ -257,7 +257,7 @@ client.on("message", async message => {
         }
     }
 	
-	if(message.content.startsWith(prefix + "poll") && checkContains(message.content, ["minute", "second", "hour"]) && /\d/.test(message.content) && !message.content.includes("@everyone") && !message.content.includes("@here") && message.author.id !== authfile.bot) {
+	if(message.content.startsWith(prefix + "poll") && checkContains(message.content, ["minute", "second", "hour"]) && /\d/.test(message.content) && !message.content.includes("@everyone") && !message.content.includes("@here") && message.author.id === config.owner) {
 		var pollentries = message.content.split(",");
 		var timeset = 5000;
 		
@@ -278,7 +278,7 @@ client.on("message", async message => {
 			message.react('👍').then(() => message.react('👎'));
 			
 			const filter = (reaction, user) => {
-				return ['👍', '👎'].includes(reaction.emoji.name) && user.id !== authfile.bot;
+				return ['👍', '👎'].includes(reaction.emoji.name) && user.id !== config.bot;
 			};
 
 			message.awaitReactions(filter, {time: timeset})
@@ -317,7 +317,7 @@ client.on("message", async message => {
 		message.reply("I pick **" + choices[Math.abs(Math.round(Math.random() * choices.length - 1))] + "**.");
 	}
 	
-	if(message.content.startsWith(prefix + "owo") && message.author.id !== authfile.bot) {
+	if(message.content.startsWith(prefix + "owo") && message.author.id !== config.bot) {
 		var owo = message.content.substr(5);
 		var endowo = ["owo", "uwu", "OwO", "OWO", "UwU", "UWU"];
 		var squiggle = ["", "~", "~~", "~~~"];
@@ -396,7 +396,7 @@ client.on("message", async message => {
         });
     }
 	
-	if((message.content.startsWith("!eval") || message.content.startsWith("!evalr")) && authfile.owner === message.author.id && !message.content.includes("console") && !message.content.includes("exec") && !message.content.includes("@everyone") && !message.content.includes("@here")) {    
+	if((message.content.startsWith("!eval") || message.content.startsWith("!evalr")) && config.owner === message.author.id && !message.content.includes("console") && !message.content.includes("exec") && !message.content.includes("@everyone") && !message.content.includes("@here")) {    
 		try {
 			let evalData = eval(message.content.substr(6));
         
@@ -416,36 +416,36 @@ client.on("message", async message => {
 	}
 	
 	// This is for adding and removing channels from the spam, nsfw and stream commands, as well as toggling the stream command.
-	if(message.content === prefix + "addchannel spam" && message.author.id == authfile.owner) {
+	if(message.content === prefix + "addchannel spam" && message.author.id == config.owner) {
 		addedchannels.push(message.channel.id);
 		fs.writeFileSync("addedchannels.json", JSON.stringify(addedchannels));
 		message.reply("successfully added channel.");
 	}
 	
-	if(message.content === prefix + "removechannel spam" && message.author.id == authfile.owner) {
+	if(message.content === prefix + "removechannel spam" && message.author.id == config.owner) {
 		remove(addedchannels, message.channel.id);
 		fs.writeFileSync("addedchannels.json", JSON.stringify(addedchannels));
 		message.reply("successfully removed channel.");
 	}
 	
-	if(message.content === prefix + "addchannel nsfw" && message.author.id == authfile.owner) {
+	if(message.content === prefix + "addchannel nsfw" && message.author.id == config.owner) {
 		nsfw.push(message.channel.id);
 		fs.writeFileSync("nsfw.json", JSON.stringify(nsfw));
 		message.reply("successfully added channel to nsfw.");
-	} else if(message.content === prefix + "removechannel nsfw" && message.author.id == authfile.owner) {
+	} else if(message.content === prefix + "removechannel nsfw" && message.author.id == config.owner) {
 		nsfw.splice(message.channel.id);
 		fs.writeFileSync("nsfw.json", JSON.stringify(nsfw));
 		message.reply("successfully removed channel from nsfw.");
 	}
 		
-	if(message.content === prefix + "stream addchannel" && message.author.id == authfile.owner) {
+	if(message.content === prefix + "stream addchannel" && message.author.id == config.owner) {
 		streamchannels.channel = message.channel.id;
 		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels), function (err) {
 			if (err) return console.log(err);
 			console.log(JSON.stringify(streamchannels));
 			message.reply("successfully made this the stream channel.");
 		});
-	} else if(message.content === prefix + "stream removechannel" && message.author.id == authfile.owner) {
+	} else if(message.content === prefix + "stream removechannel" && message.author.id == config.owner) {
 		streamchannels.channel = "";
 		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels), function (err) {
 			if (err) return console.log(err);
@@ -455,7 +455,7 @@ client.on("message", async message => {
 	}
 	
 	// command for viewing and leaving servers
-	if(message.content.startsWith(prefix + "servers") && message.author.id === authfile.owner) {
+	if(message.content.startsWith(prefix + "servers") && message.author.id === config.owner) {
 		let args = message.content.split(" ").splice(1).join(" ");
 		let server_array = client.guilds.array();
 		
@@ -484,13 +484,13 @@ client.on("message", async message => {
 		}
 	}
 	
-	if(message.content === prefix + "stream enable" && message.author.id == authfile.owner) {
+	if(message.content === prefix + "stream enable" && message.author.id == config.owner) {
 		streamchannels.enabled = true;
 		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels.enabled), function (err) {
 			if (err) return console.log(err);
 			message.reply("successfully enabled the streaming service.");
 		});
-	} else if(message.content === prefix + "stream disable" && message.author.id == authfile.owner) {
+	} else if(message.content === prefix + "stream disable" && message.author.id == config.owner) {
 		streamchannels.enabled = false;
 		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels.enabled), function (err) {
 			if (err) return console.log(err);
@@ -505,7 +505,7 @@ client.on("message", async message => {
 		message.reply(streamstatusreply);
 	}
 	
-	if(message.content.startsWith(prefix + "pa") && message.author.id == authfile.owner && !piper.includes(message.content.substring(5))) {
+	if(message.content.startsWith(prefix + "pa") && message.author.id == config.owner && !piper.includes(message.content.substring(5))) {
 		message.delete();
 		piper.push(message.content.substring(5));
 		fs.writeFileSync("piper.json", JSON.stringify(piper));
@@ -516,7 +516,7 @@ client.on("message", async message => {
 	//			== DEPCRECATED TALKCHANNEL FEATURE ==
 	// bit that makes the bot send messages between two discords
 	// checks if the message sender is the bot. we don't want it to be. Fuck he
-	/*if(message.author.id !== authfile.bot) {
+	/*if(message.author.id !== config.bot) {
 		// this is the code that sends messages between channels
 		if(talkchannels.includes(message.channel.id)) {
 			var urlRegex = /(\b(?:(?:https?)|(?:ftp)|(?:file)):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*(?:(?:\.jpg)|(?:\.jpeg)|(?:\.png)|(?:\.gif)))/ig;
@@ -571,15 +571,15 @@ client.on("message", async message => {
 	}*/
 		
 	// this is the code for adding/removing them. it's so God Damn Short !
-	if(message.content === prefix + "addchannel talk" && message.author.id === authfile.owner && !talkchannels.includes(message.channel.id)) {
+	if(message.content === prefix + "addchannel talk" && message.author.id === config.owner && !talkchannels.includes(message.channel.id)) {
 		talkchannels.push(message.channel.id);
 		fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels));
 		message.reply("successfully added channel to talk.");
-	} else if(message.content === prefix + "removechannel talk" && message.author.id === authfile.owner && talkchannels.includes(message.channel.id)) {
+	} else if(message.content === prefix + "removechannel talk" && message.author.id === config.owner && talkchannels.includes(message.channel.id)) {
 		talkchannels.splice(message.channel.id);
 		fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels));
 		message.reply("successfully removed channel from talk.");
-	} else if(message.content === prefix + "resetchannels talk" && message.author.id === authfile.owner) {
+	} else if(message.content === prefix + "resetchannels talk" && message.author.id === config.owner) {
 		for(var k = 0; k <= talkchannels; k++) {
 			talkchannels.splice[k];
 		}
@@ -618,7 +618,7 @@ process.on('uncaughtException', function (err) {
 	console.log(util.inspect(err));
 });
 
-client.login(authfile.authkey).then(function() {
+client.login(config.authkey).then(function() {
 	console.log("successfully logged in");
 }).catch(function (error) {
 	console.log(error);

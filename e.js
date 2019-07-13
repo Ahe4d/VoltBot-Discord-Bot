@@ -257,50 +257,56 @@ client.on("message", async message => {
         }
     }
 	
-	if(message.content.startsWith(prefix + "poll") && checkContains(message.content, ["minute", "second", "hour"]) && /\d/.test(message.content) && !message.content.includes("@everyone") && !message.content.includes("@here") && message.author.id == '155562672320937984') {
+	if(message.content.startsWith(prefix + "poll") && checkContains(message.content, ["minute", "second", "hour"]) && /\d/.test(message.content) && !message.content.includes("@everyone") && !message.content.includes("@here") && message.author.id !== authfile.bot) {
 		var pollentries = message.content.split(",");
-		var time = 5000;
+		var timeset = 5000;
 		
 		var thumbsupreact = 0;
 		var thumbsdownreact = 0;
 		var pollquestion = pollentries[0].substr(7).toLowerCase();
 		
 		if(pollentries[1].includes("second")) {
-			time = convertTime('seconds', parseInt(pollentries[1].match(/\d+/)[0]));
+			timeset = convertTime('seconds', parseInt(pollentries[1].match(/\d+/)[0]));
 		} else if(pollentries[1].includes("minute")) {
-			time = convertTime('minutes', parseInt(pollentries[1].match(/\d+/)[0]));
+			timeset = convertTime('minutes', parseInt(pollentries[1].match(/\d+/)[0]));
 		} else if(pollentries[1].includes("hour")) {
-			time = convertTime('hours', parseInt(pollentries[1].match(/\d+/)[0]));
+			timeset = convertTime('hours', parseInt(pollentries[1].match(/\d+/)[0]));
 		}
 		
-		if(time <= 604800000) {
+		if(timeset <= 604800000) {
 			message.channel.send("**" + message.author + " started a poll:** " + pollquestion).then(message => {
-			message.react(`ðŸ‘`);
+			message.react('👍').then(() => message.react('👎'));
 			
-			setTimeout(() => {
-			message.react(`ðŸ‘Ž`);
-			},250);
-			
-			setTimeout(() => {
-			thumbsupreact = message.reactions.find(reaction => reaction.emoji.name === `ðŸ‘`).count - 1;
-			thumbsdownreact = message.reactions.find(reaction => reaction.emoji.name === `ðŸ‘Ž`).count - 1;
-			message.delete();
-			
-			var result_firsthalf = "When asked **" + pollquestion + "**, people voted:\n" + thumbsupreact + " :thumbsup:\n" + thumbsdownreact + " :thumbsdown:";
-			if(thumbsupreact > thumbsdownreact) {
-				thumbsupreact = "**" + thumbsupreact + "**";
-				var result_final = result_firsthalf + "\nmeaning the vote won in favour of **Yes**.";
-			} else if(thumbsupreact < thumbsdownreact) {
-				thumbsdownreact = "**" + thumbsdownreact + "**";
-				var result_final = result_firsthalf + "\nmeaning the vote won in favour of **No**.";
-			} else if(thumbsupreact === thumbsdownreact) {
-				var result_final = result_firsthalf + "\nmeaning the vote has **tied**.";
-			} else {
-				var result_final = "error!";
-			}
-			message.channel.send(result_final);
-			}, time+1000, time);
-		});
+			const filter = (reaction, user) => {
+				return ['👍', '👎'].includes(reaction.emoji.name) && user.id !== authfile.bot;
+			};
+
+			message.awaitReactions(filter, {time: timeset})
+				.then(collected => {
+					thumbsupreact = message.reactions.find(reaction => reaction.emoji.name === `👍`).count - 1;
+					thumbsdownreact = message.reactions.find(reaction => reaction.emoji.name === `👎`).count - 1;
+					message.delete();
+					
+					var result_firsthalf = "When asked **" + pollquestion + "**, people voted:\n" + thumbsupreact + " :thumbsup:\n" + thumbsdownreact + " :thumbsdown:";
+					if(thumbsupreact > thumbsdownreact) {
+						thumbsupreact = "**" + thumbsupreact + "**";
+						var result_final = result_firsthalf + "\nmeaning the vote won in favour of **Yes**.";
+					} else if(thumbsupreact < thumbsdownreact) {
+						thumbsdownreact = "**" + thumbsdownreact + "**";
+						var result_final = result_firsthalf + "\nmeaning the vote won in favour of **No**.";
+					} else if(thumbsupreact === thumbsdownreact) {
+						var result_final = result_firsthalf + "\nmeaning the vote has **tied**.";
+					} else {
+						var result_final = "Error!";
+					}
+					
+					message.channel.send(result_final);
+				})
+			})
+			.catch(collected => {
+				console.log(`After a minute, only ${collected.size} out of 4 reacted.`);
+				message.reply('you didn\'t react with neither a thumbs up, nor a thumbs down.');
+			});
 		} else {
 			message.channel.send("Error: The time interval was too long. The maximum poll time allowed is 7 days.");
 		}
@@ -348,15 +354,15 @@ client.on("message", async message => {
 	}
 	
 	// useful command for checking the status of a minecraft server
-	if (message.content === (prefix + "status") && minecraft.minecraft_discordserver.includes(message.guild.id)) {
-        var url = 'http://mcapi.us/server/status?ip=' + minecraft.mcIP + '&port=' + minecraft.mcPort;
+	if (message.content === (prefix + "minecraft") && minecraft.minecraft_discordserver.includes(message.guild.id)) {
+        let url = 'http://mcapi.us/server/status?ip=' + minecraft.mcIP + '&port=' + minecraft.mcPort;
         request(url, function(err, response, body) {
             if(err || minecraft.mcIP === "") {
                 return message.reply('Error getting Minecraft server status');
             }
 			
             body = JSON.parse(body);
-            var status = ':x: **' + minecraft.mcIP + ':' + minecraft.mcPort + '** | *Minecraft server is currently offline*';
+            let status = ':x: **' + minecraft.mcIP + ':' + minecraft.mcPort + '** | *Minecraft server is currently offline*';
 			
             if(body.online) {
                 status = ':white_check_mark: **' + minecraft.mcIP + ':' + minecraft.mcPort + '** | The server is **online**  -  ';

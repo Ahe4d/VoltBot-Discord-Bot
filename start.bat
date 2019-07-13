@@ -1,2 +1,0 @@
-node e.js
-pause

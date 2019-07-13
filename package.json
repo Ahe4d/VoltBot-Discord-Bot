@@ -1,29 +1,19 @@
 {
-  "name": "DiscordBot-master",
+  "name": "voltbot",
   "version": "1.0.0",
-  "description": "",
-  "main": "maxwell_bot.js",
+  "description": "discord bot with multiple features",
+  "main": "e.js",
   "dependencies": {
-    "booru": "^0.4.0",
-    "canvas": "^1.6.11",
-    "danbooru": "^3.0.7",
-    "discord.js": "^11.3.2",
-    "faceapp": "^0.4.3",
-    "image-downloader": "^3.3.0",
-    "mathjs": "^3.16.5",
-    "merge-images": "^1.0.5",
-    "random-cat": "^1.0.1",
-    "req-fast": "^0.2.17",
-    "request": "^2.83.0",
-    "superagent": "^3.8.2",
-    "twitter": "^1.7.1",
-    "xml-js": "^1.6.2"
+    "discord.js": "^11.5.1",
+    "mathjs": "^6.0.3",
+    "request": "^2.88.0",
+    "twitter": "^1.7.1"
   },
   "devDependencies": {},
   "scripts": {
+    "start": "node e.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "author": "Maxwell",
   "license": "ISC"
 }

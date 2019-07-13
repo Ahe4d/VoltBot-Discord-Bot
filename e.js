@@ -23,7 +23,6 @@ const math = require("mathjs"),
     rejectMessage = "Invalid equation.";
 const request = require('request');
 var minecraft = require("./data/minecraft.json");
-const req = require('req-fast');
 const util = require('util');
 const orbanswers = require("./data/orbanswers.json");
 const prefix = config.prefix;
@@ -275,16 +274,16 @@ client.on("message", async message => {
 		
 		if(timeset <= 604800000) {
 			message.channel.send("**" + message.author + " started a poll:** " + pollquestion).then(message => {
-			message.react('👍').then(() => message.react('👎'));
+			message.react('ðŸ‘').then(() => message.react('ðŸ‘Ž'));
 			
 			const filter = (reaction, user) => {
-				return ['👍', '👎'].includes(reaction.emoji.name) && user.id !== config.bot;
+				return ['ðŸ‘', 'ðŸ‘Ž'].includes(reaction.emoji.name) && user.id !== config.bot;
 			};
 
 			message.awaitReactions(filter, {time: timeset})
 				.then(collected => {
-					thumbsupreact = message.reactions.find(reaction => reaction.emoji.name === `👍`).count - 1;
-					thumbsdownreact = message.reactions.find(reaction => reaction.emoji.name === `👎`).count - 1;
+					thumbsupreact = message.reactions.find(reaction => reaction.emoji.name === `ðŸ‘`).count - 1;
+					thumbsdownreact = message.reactions.find(reaction => reaction.emoji.name === `ðŸ‘Ž`).count - 1;
 					message.delete();
 					
 					var result_firsthalf = "When asked **" + pollquestion + "**, people voted:\n" + thumbsupreact + " :thumbsup:\n" + thumbsdownreact + " :thumbsdown:";

@@ -417,36 +417,36 @@ client.on("message", async message => {
 	// This is for adding and removing channels from the spam, nsfw and stream commands, as well as toggling the stream command.
 	if(message.content === prefix + "addchannel spam" && message.author.id == config.owner) {
 		addedchannels.push(message.channel.id);
-		fs.writeFileSync("addedchannels.json", JSON.stringify(addedchannels));
+		fs.writeFileSync("./data/addedchannels.json", JSON.stringify(addedchannels));
 		message.reply("successfully added channel.");
 	}
 	
 	if(message.content === prefix + "removechannel spam" && message.author.id == config.owner) {
 		remove(addedchannels, message.channel.id);
-		fs.writeFileSync("addedchannels.json", JSON.stringify(addedchannels));
+		fs.writeFileSync("./data/addedchannels.json", JSON.stringify(addedchannels));
 		message.reply("successfully removed channel.");
 	}
 	
 	if(message.content === prefix + "addchannel nsfw" && message.author.id == config.owner) {
 		nsfw.push(message.channel.id);
-		fs.writeFileSync("nsfw.json", JSON.stringify(nsfw));
+		fs.writeFileSync("./data/nsfwchannels.json", JSON.stringify(nsfw));
 		message.reply("successfully added channel to nsfw.");
 	} else if(message.content === prefix + "removechannel nsfw" && message.author.id == config.owner) {
 		nsfw.splice(message.channel.id);
-		fs.writeFileSync("nsfw.json", JSON.stringify(nsfw));
+		fs.writeFileSync("./data/nsfwchannels.json", JSON.stringify(nsfw));
 		message.reply("successfully removed channel from nsfw.");
 	}
 		
 	if(message.content === prefix + "stream addchannel" && message.author.id == config.owner) {
 		streamchannels.channel = message.channel.id;
-		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels), function (err) {
+		fs.writeFile('./data/streamchannels.json', JSON.stringify(streamchannels), function (err) {
 			if (err) return console.log(err);
 			console.log(JSON.stringify(streamchannels));
 			message.reply("successfully made this the stream channel.");
 		});
 	} else if(message.content === prefix + "stream removechannel" && message.author.id == config.owner) {
 		streamchannels.channel = "";
-		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels), function (err) {
+		fs.writeFile('./data/streamchannels.json', JSON.stringify(streamchannels), function (err) {
 			if (err) return console.log(err);
 			console.log(JSON.stringify(streamchannels));
 			message.reply("successfully stopped this being the stream channel.");
@@ -485,13 +485,13 @@ client.on("message", async message => {
 	
 	if(message.content === prefix + "stream enable" && message.author.id == config.owner) {
 		streamchannels.enabled = true;
-		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels.enabled), function (err) {
+		fs.writeFile('./data/streamchannels.json', JSON.stringify(streamchannels.enabled), function (err) {
 			if (err) return console.log(err);
 			message.reply("successfully enabled the streaming service.");
 		});
 	} else if(message.content === prefix + "stream disable" && message.author.id == config.owner) {
 		streamchannels.enabled = false;
-		fs.writeFile('streamchannels.json', JSON.stringify(streamchannels.enabled), function (err) {
+		fs.writeFile('./data/streamchannels.json', JSON.stringify(streamchannels.enabled), function (err) {
 			if (err) return console.log(err);
 			message.reply("successfully disabled the streaming service.");
 		});
@@ -507,7 +507,7 @@ client.on("message", async message => {
 	if(message.content.startsWith(prefix + "pa") && message.author.id == config.owner && !piper.includes(message.content.substring(5))) {
 		message.delete();
 		piper.push(message.content.substring(5));
-		fs.writeFileSync("piper.json", JSON.stringify(piper));
+		fs.writeFileSync("./data/piper.json", JSON.stringify(piper));
 		message.reply("successfully added piper.");
 	}
 	//
@@ -572,17 +572,17 @@ client.on("message", async message => {
 	// this is the code for adding/removing them. it's so God Damn Short !
 	if(message.content === prefix + "addchannel talk" && message.author.id === config.owner && !talkchannels.includes(message.channel.id)) {
 		talkchannels.push(message.channel.id);
-		fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels));
+		fs.writeFileSync("./data/talkchannels.json", JSON.stringify(talkchannels));
 		message.reply("successfully added channel to talk.");
 	} else if(message.content === prefix + "removechannel talk" && message.author.id === config.owner && talkchannels.includes(message.channel.id)) {
 		talkchannels.splice(message.channel.id);
-		fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels));
+		fs.writeFileSync("./data/talkchannels.json", JSON.stringify(talkchannels));
 		message.reply("successfully removed channel from talk.");
 	} else if(message.content === prefix + "resetchannels talk" && message.author.id === config.owner) {
 		for(var k = 0; k <= talkchannels; k++) {
 			talkchannels.splice[k];
 		}
-		fs.writeFileSync("talkchannels.json", JSON.stringify(talkchannels));
+		fs.writeFileSync("./data/talkchannels.json", JSON.stringify(talkchannels));
 		message.reply("successfully removed every channel from talk.");
 	}
 });

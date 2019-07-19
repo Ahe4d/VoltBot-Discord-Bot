@@ -215,14 +215,17 @@ client.on('message', async message => {
 		}
 		
 		// sorting the roles properly because discordjs doesn't do it
-		let roleposition = 0;
-		for(var i = 0; i < person.roles.array().length; i++) {
-			var lastrole = person.roles.array()[i];
+		let rolePosition = 0;
+		let lastRole = person.roles.array();
+		var roleColour;
+		
+		for(let i = 0; i < person.roles.array().length; i++) {
+			lastRole = person.roles.array()[i];
 			
 			// assigning the role colour based on the users top role/name colour
-			if(lastrole.position > roleposition && lastrole.hexColor !== "#000000") {
-				roleposition = lastrole.position;
-				var rolecolour = lastrole.hexColor;
+			if(lastRole.position > rolePosition && lastRole.hexColor !== "#000000") {
+				rolePosition = lastRole.position;
+				roleColour = lastRole.hexColor;
 			}
 		}
 		
@@ -233,7 +236,7 @@ client.on('message', async message => {
 		const embed = new Discord.RichEmbed()
 		.setTitle(person.user.username + "'s avatar").setURL(person.user.displayAvatarURL)
 		.setAuthor(avatarholder, person.user.displayAvatarURL)
-		.setColor(rolecolour)
+		.setColor(roleColour)
 		.setImage(person.user.displayAvatarURL);
 		message.channel.send({embed});
 	}

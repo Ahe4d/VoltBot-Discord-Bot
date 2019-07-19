@@ -198,26 +198,27 @@ client.on('message', async message => {
   }
 
 	if(message.content.startsWith(prefix + "av")) {
-		var args = message.content.split(" ").splice(1).join(" ");
+		const args = message.content.split(" ").splice(1).join(" ");
+		let person;
 		
 		// try to find the person by nickname; then username; then mentioned; and finally if all else fails, default to the message author
 		if(message.mentions.users.first() != null) {
-			var person = message.guild.member(message.mentions.users.first())
+			person = message.guild.member(message.mentions.users.first())
 		} else if (person == null && args) {
-			var usersinserver = message.guild.members.array().map(people => people);
-			for(var i = 0; i < usersinserver.length; i++) {
+			let usersinserver = message.guild.members.array().map(people => people);
+			for(let i = 0; i < usersinserver.length; i++) {
 				if(usersinserver[i].user.username.toLocaleLowerCase().includes(args.toLocaleLowerCase()) || usersinserver[i].displayName.toLocaleLowerCase().includes(args.toLocaleLowerCase())) {
-					var person = usersinserver[i];
+					person = usersinserver[i];
 				}
 			}
 		} else if(person == null) {
-			var person = message.guild.member(message.author);
+			person = message.guild.member(message.author);
 		}
 		
 		// sorting the roles properly because discordjs doesn't do it
 		let rolePosition = 0;
-		let lastRole = person.roles.array();
-		var roleColour;
+		let lastRole;
+		let roleColour;
 		
 		for(let i = 0; i < person.roles.array().length; i++) {
 			lastRole = person.roles.array()[i];

@@ -197,75 +197,46 @@ client.on('message', async message => {
     message.channel.send('/o/');
   }
 
-  if (message.content.startsWith(prefix + 'av')) {
-    var args = message.content
-      .split(' ')
-      .splice(1)
-      .join(' ');
-
-    // try to find the person by nickname; then username; then mentioned; and finally if all else fails, default to the message author
-    var person = message.guild.members.find(
-      member =>
-        member.user.username.toLocaleLowerCase() === args.toLocaleLowerCase()
-    );
-    if (person === null) {
-      var person = message.guild.members.find(
-        member =>
-          member.displayName.toLocaleLowerCase() === args.toLocaleLowerCase()
-      );
-      if (person === null) {
-        var person = message.guild.member(message.mentions.users.first());
-        if (person === null && args) {
-          var usersinserver = message.guild.members
-            .array()
-            .map(people => people);
-          for (var i = 0; i < usersinserver.length; i++) {
-            if (
-              usersinserver[i].user.username
-                .toLocaleLowerCase()
-                .includes(args.toLocaleLowerCase()) ||
-              usersinserver[i].displayName
-                .toLocaleLowerCase()
-                .includes(args.toLocaleLowerCase())
-            ) {
-              var person = usersinserver[i];
-            }
-          }
-        }
-        if (person === null) {
-          var person = message.guild.member(message.author);
-        }
-      }
-    }
-
-    // sorting the roles properly because discordjs doesn't do it
-    var roleposition = 0;
-    for (var i = 0; i < person.roles.array().length; i++) {
-      var lastrole = person.roles.array()[i];
-
-      // assigning the role colour based on the users top role/name colour
-      if (lastrole.position > roleposition && lastrole.hexColor !== '#000000') {
-        roleposition = lastrole.position;
-        var rolecolour = lastrole.hexColor;
-      }
-    }
-
-    // get the author and their nickname if they have one
-    if (person.nickname !== null) {
-      var avatarholder = person.user.tag + ' (' + person.nickname + ')';
-    } else {
-      var avatarholder = person.user.tag;
-    }
-
-    // and then finally, make the embed
-    var embed = new Discord.RichEmbed()
-      .setTitle(person.user.username + "'s avatar")
-      .setURL(person.user.displayAvatarURL)
-      .setAuthor(avatarholder, person.user.displayAvatarURL)
-      .setColor(rolecolour)
-      .setImage(person.user.displayAvatarURL);
-    message.channel.send({ embed });
-  }
+	if(message.content.startsWith(prefix + "av")) {
+		var args = message.content.split(" ").splice(1).join(" ");
+		
+		// try to find the person by nickname; then username; then mentioned; and finally if all else fails, default to the message author
+		if(message.mentions.users.first() != null) {
+			var person = message.guild.member(message.mentions.users.first())
+		} else if (person == null && args) {
+			var usersinserver = message.guild.members.array().map(people => people);
+			for(var i = 0; i < usersinserver.length; i++) {
+				if(usersinserver[i].user.username.toLocaleLowerCase().includes(args.toLocaleLowerCase()) || usersinserver[i].displayName.toLocaleLowerCase().includes(args.toLocaleLowerCase())) {
+					var person = usersinserver[i];
+				}
+			}
+		} else if(person == null) {
+			var person = message.guild.member(message.author);
+		}
+		
+		// sorting the roles properly because discordjs doesn't do it
+		var roleposition = 0;
+		for(var i = 0; i < person.roles.array().length; i++) {
+			var lastrole = person.roles.array()[i];
+			
+			// assigning the role colour based on the users top role/name colour
+			if(lastrole.position > roleposition && lastrole.hexColor !== "#000000") {
+				roleposition = lastrole.position;
+				var rolecolour = lastrole.hexColor;
+			}
+		}
+		
+		// get the author and their nickname if they have one
+		const avatarholder = person.nickname ? person.user.tag + " (" + person.nickname + ")" : person.user.tag;
+			
+		// and then finally, make the embed
+		const embed = new Discord.RichEmbed()
+		.setTitle(person.user.username + "'s avatar").setURL(person.user.displayAvatarURL)
+		.setAuthor(avatarholder, person.user.displayAvatarURL)
+		.setColor(rolecolour)
+		.setImage(person.user.displayAvatarURL);
+		message.channel.send({embed});
+	}
 
   if (message.content.startsWith(prefix + 'm')) {
     var args = message.content

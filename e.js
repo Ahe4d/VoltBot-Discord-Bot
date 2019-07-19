@@ -215,7 +215,7 @@ client.on('message', async message => {
 		}
 		
 		// sorting the roles properly because discordjs doesn't do it
-		var roleposition = 0;
+		let roleposition = 0;
 		for(var i = 0; i < person.roles.array().length; i++) {
 			var lastrole = person.roles.array()[i];
 			

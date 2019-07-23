@@ -25,6 +25,7 @@ const keywords = [
   'require'
 ];
 const rejectMessage = 'Invalid equation.';
+const util = require('util');
 
 // functions that do stuff
 function checkContains(check_string, check_array) {

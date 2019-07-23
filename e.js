@@ -26,6 +26,7 @@ const keywords = [
 ];
 const rejectMessage = 'Invalid equation.';
 const util = require('util');
+const Markov = require('js-markov');
 
 // functions that do stuff
 function checkContains(check_string, check_array) {
@@ -444,6 +445,32 @@ client.on('message', async message => {
         endowo[math.abs(math.round(math.random() * endowo.length - 1))]
     );
   }
+  
+	// markov generator
+	if(message.content.startsWith(prefix + "grab") && message.author.id === config.owner) {
+		let args = parseInt(message.content.split(' ').splice(1).join(' '));
+		let messages;
+		
+		if(isNaN(args)) {
+			args = 50;
+		}
+		
+		message.channel.fetchMessages({ limit: args }).then(m => {
+				let markov = new Markov();
+				messages = m.map(x => x.cleanContent);
+				markov.addStates(messages);
+				markov.train(100);
+				let markovString = markov.generateRandom() + " ";
+				function getRandomArbitrary(min, max) {
+					return Math.floor(Math.random() * (max - min) + min);
+				}
+				for(let i = 0; i < getRandomArbitrary(0, 1000); i++) {
+					markovString += markov.generateRandom() + " ";
+				}
+				message.channel.send(markovString.replace(/\b<@[a-zA-Z]*/,""));
+			}
+		)
+	}
 
   // useful command for checking the status of a minecraft server
   if (

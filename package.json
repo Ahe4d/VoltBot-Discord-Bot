@@ -5,6 +5,7 @@
   "main": "e.js",
   "dependencies": {
     "discord.js": "^11.5.1",
+    "js-markov": "^2.0.4",
     "mathjs": "^6.0.3",
     "request": "^2.88.0",
     "twitter": "^1.7.1"

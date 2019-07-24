@@ -447,7 +447,10 @@ client.on('message', async message => {
   }
   
 	// markov generator
-	if(message.content.startsWith(prefix + "grab") && message.author.id === config.owner) {
+	if(
+		message.content.startsWith(prefix + "grab") &&
+		message.author.id === config.owner
+	) {
 		let args = parseInt(message.content.split(' ').splice(1).join(' '));
 		let messages;
 		

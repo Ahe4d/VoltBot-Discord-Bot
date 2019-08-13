@@ -537,8 +537,8 @@ client.on('message', async message => {
   }
 
   if (
-    (message.content.startsWith('!eval') ||
-      message.content.startsWith('!evalr')) &&
+    (message.content.startsWith(prefix + '!eval') ||
+      message.content.startsWith(prefix + '!evalr')) &&
     config.owner === message.author.id &&
     !message.content.includes('console') &&
     !message.content.includes('exec') &&

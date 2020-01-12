@@ -1,1 +1,1 @@
-worker: echo hi
+worker: node e.js

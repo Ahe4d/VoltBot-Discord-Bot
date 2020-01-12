@@ -7,10 +7,7 @@ const config = require('./data/config.json');
 const minecraft = require('./data/minecraft.json');
 const orbanswers = require('./data/orbanswers.json');
 const piper = require('./data/piper.json');
-const addedchannels = require('./data/addedchannels.json');
-const twitterchannels = require('./data/twitterchannels.json');
-const talkchannels = require('./data/talkchannels.json');
-const nsfw = require('./data/nsfwchannels.json');
+const channels = require('./data/channels.json');
 const prefix = config.prefix;
 const keywords = [
   'constructor',
@@ -69,6 +66,25 @@ function remove(array, element) {
     array.splice(index, 1);
     return array;
   }
+}
+
+function writeToChannels(type, content) {
+  fs.readFile('./data/channels.json', 'utf8', function readFileCallback(err, data){
+    if (err) console.log(err);
+    else {
+      obj = JSON.parse(data); //now it an object
+      if (type == "nsfw") 
+        obj.nsfw.push(content);
+      else if (type == "twitter")
+        obj.twitter.push(content); 
+      else if (type == "added")
+        obj.added.push(content);
+      else if (type == "talk")
+        obj.talk.push(content); 
+      json = JSON.stringify(obj); //convert it back to json
+      fs.writeFile('./data/channels.json', json, 'utf8', callback); // write it back 
+    }
+  });
 }
 
 client.on('message', async message => {
@@ -515,11 +531,8 @@ client.on('message', async message => {
     message.content === prefix + 'addchannel spam' &&
     message.author.id == config.owner
   ) {
-    addedchannels.push(message.channel.id);
-    fs.writeFileSync(
-      './data/addedchannels.json',
-      JSON.stringify(addedchannels)
-    );
+    channels.added.push(message.channel.id);
+    writeToChannels('added', JSON.stringify(channels.added));
     message.reply('successfully added channel.');
   }
 
@@ -527,11 +540,8 @@ client.on('message', async message => {
     message.content === prefix + 'removechannel spam' &&
     message.author.id == config.owner
   ) {
-    remove(addedchannels, message.channel.id);
-    fs.writeFileSync(
-      './data/addedchannels.json',
-      JSON.stringify(addedchannels)
-    );
+    remove(channels.added, message.channel.id);
+    writeToChannels('added', JSON.stringify(channels.added));
     message.reply('successfully removed channel.');
   }
 
@@ -539,15 +549,15 @@ client.on('message', async message => {
     message.content === prefix + 'addchannel nsfw' &&
     message.author.id == config.owner
   ) {
-    nsfw.push(message.channel.id);
-    fs.writeFileSync('./data/nsfwchannels.json', JSON.stringify(nsfw));
+    channels.nsfw.push(message.channel.id);
+    writeToChannels('nsfw', JSON.stringify(channels.nsfw));
     message.reply('successfully added channel to nsfw.');
   } else if (
     message.content === prefix + 'removechannel nsfw' &&
     message.author.id == config.owner
   ) {
-    nsfw.splice(message.channel.id);
-    fs.writeFileSync('./data/nsfwchannels.json', JSON.stringify(nsfw));
+    channels.nsfw.splice(message.channel.id);
+    writeToChannels('nsfw', JSON.stringify(channels.nsfw));
     message.reply('successfully removed channel from nsfw.');
   }
 
@@ -555,30 +565,18 @@ client.on('message', async message => {
     message.content === prefix + 'addchannel twitter' &&
     message.author.id == config.owner
   ) {
-    twitterchannels.channel = message.channel.id;
-    fs.writeFile(
-      './data/twitterchannels.json',
-      JSON.stringify(twitterchannels),
-      function(err) {
-        if (err) return console.log(err);
-        console.log(JSON.stringify(twitterchannels));
-        message.reply('successfully made this the stream channel.');
-      }
-    );
+    channels.twitter.channel = message.channel.id;
+    writeToChannels('twitter', JSON.stringify(channels.twitterchannel));
+    console.log(JSON.stringify(channels.twitter.channel));
+    message.reply('successfully made this the stream channel.');
   } else if (
     message.content === prefix + 'stream removechannel' &&
     message.author.id == config.owner
   ) {
-    twitterchannels.channel = '';
-    fs.writeFile(
-      './data/twitterchannels.json',
-      JSON.stringify(twitterchannels),
-      function(err) {
-        if (err) return console.log(err);
-        console.log(JSON.stringify(twitterchannels));
-        message.reply('successfully stopped this being the stream channel.');
-      }
-    );
+    channels.twitter.channel = '';
+    writeToChannels('twitter', JSON.stringify(channels.twitter.channel));
+    console.log(JSON.stringify(channels.twitter));
+    message.reply('successfully stopped this being the stream channel.');
   }
 
   // command for viewing and leaving servers
@@ -622,40 +620,28 @@ client.on('message', async message => {
     message.content === prefix + 'stream enable' &&
     message.author.id == config.owner
   ) {
-    twitterchannels.enabled = true;
-    fs.writeFile(
-      './data/twitterchannels.json',
-      JSON.stringify(twitterchannels.enabled),
-      function(err) {
-        if (err) return console.log(err);
-        message.reply('successfully enabled the streaming service.');
-      }
-    );
+    channels.twitter.enabled = true;
+    writeToChannels('twitter', JSON.stringify(channels.twitter.enabled));
+    message.reply('successfully enabled the streaming service.');
   } else if (
     message.content === prefix + 'stream disable' &&
     message.author.id == config.owner
   ) {
-    twitterchannels.enabled = false;
-    fs.writeFile(
-      './data/twitterchannels.json',
-      JSON.stringify(twitterchannels.enabled),
-      function(err) {
-        if (err) return console.log(err);
-        message.reply('successfully disabled the streaming service.');
-      }
-    );
+    channels.twitter.enabled = false;
+    writeToChannels('twitter', JSON.stringify(channels.twitter.enabled));
+    message.reply('successfully disabled the streaming service.');
   }
 
   if (message.content === prefix + 'stream') {
     var streamstatusreply = '';
-    twitterchannels.enabled === true
+    channels.twitter.enabled === true
       ? (streamstatusreply += 'streaming is enabled, ')
       : (streamstatusreply += 'streaming is disabled, ');
-    twitterchannels.channel === ''
+      channels.twitter.enabled === ''
       ? (streamstatusreply += 'but the stream channel is currently not set.')
       : (streamstatusreply +=
           'stream channel is currently set to <#' +
-          twitterchannels.channel +
+          channels.twitter.enabled +
           '>');
     message.reply(streamstatusreply);
   }
@@ -675,33 +661,33 @@ client.on('message', async message => {
   if (
     message.content === prefix + 'addchannel talk' &&
     message.author.id === config.owner &&
-    !talkchannels.includes(message.channel.id)
+    !channels.talk.includes(message.channel.id)
   ) {
-    talkchannels.push(message.channel.id);
-    fs.writeFileSync('./data/talkchannels.json', JSON.stringify(talkchannels));
+    channels.talk.push(message.channel.id);
+    writeToChannels('talk', JSON.stringify(channels.talk));
     message.reply('successfully added channel to talk.');
   } else if (
     message.content === prefix + 'removechannel talk' &&
     message.author.id === config.owner &&
-    talkchannels.includes(message.channel.id)
+    channels.talk.includes(message.channel.id)
   ) {
-    talkchannels.splice(message.channel.id);
-    fs.writeFileSync('./data/talkchannels.json', JSON.stringify(talkchannels));
+    channels.talk.splice(message.channel.id);
+    writeToChannels('talk', JSON.stringify(channels.talk));
     message.reply('successfully removed channel from talk.');
   } else if (
     message.content === prefix + 'resetchannels talk' &&
     message.author.id === config.owner
   ) {
-    for (var k = 0; k <= talkchannels; k++) {
-      talkchannels.splice[k];
+    for (var k = 0; k <= channels.talk; k++) {
+      channels.talk.splice[k];
     }
-    fs.writeFileSync('./data/talkchannels.json', JSON.stringify(talkchannels));
+    writeToChannels('talk', JSON.stringify(channels.talk));
     message.reply('successfully removed every channel from talk.');
   }
   
   
   // SPAM COMMANDS - uses addedchannels.json to store channel ids
-  if (addedchannels.includes(message.channel.id)) {
+  if (channels.added.includes(message.channel.id)) {
     if (
       input.includes('PIPER') &&
       message.author.id !== config.bot &&
@@ -728,7 +714,7 @@ client.on('message', async message => {
   }
 
   // NSFW COMMANDS - uses nsfw.json to store channels ids
-  if (nsfw.includes(message.channel.id)) {
+  if (channels.nsfw.includes(message.channel.id)) {
     if (message.content.startsWith(prefix + 'touhou')) {
       function shuffle(sourceArray) {
         for (var i = 0; i < sourceArray.length - 1; i++) {

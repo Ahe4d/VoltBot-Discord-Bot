@@ -1,3 +1,10 @@
 {
-    "authkey": "NDA1MTQzODg5NjkxOTM0NzIw.XhroNQ.BSkuPxEc0b9IgF9m5m8Zr7kVhwU"
+	"owner" : "",
+	"bot" : "",
+	"authkey" : "",
+	"consumer_key": "",
+	"consumer_secret": "",
+	"access_token_key": "",
+	"access_token_secret": "",
+    "prefix" : "!"
 }

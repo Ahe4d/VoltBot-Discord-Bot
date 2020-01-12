@@ -4,13 +4,14 @@ const request = require('request');
 const Discord = require('discord.js');
 const client = new Discord.Client({ autoReconnect: true });
 const config = require('./data/config.json');
-const minecraft = require('./data/minecraft.json');
-const orbanswers = require('./data/orbanswers.json');
-const piper = require('./data/piper.json');
-const addedchannels = require('./data/addedchannels.json');
-const streamchannels = require('./data/streamchannels.json');
-const talkchannels = require('./data/talkchannels.json');
-const nsfw = require('./data/nsfwchannels.json');
+const http = require('http');
+// const minecraft = require('./data/minecraft.json');
+// const orbanswers = require('./data/orbanswers.json');
+// const piper = require('./data/piper.json');
+// const addedchannels = require('./data/addedchannels.json');
+// const streamchannels = require('./data/streamchannels.json');
+// const talkchannels = require('./data/talkchannels.json');
+//  const nsfw = require('./data/nsfwchannels.json');
 const prefix = config.prefix;
 const keywords = [
   'constructor',
@@ -739,6 +740,11 @@ client
   .login(config.authkey)
   .then(function() {
     console.log('successfully logged in');
+    http.createServer(function (req, res) {
+      res.writeHead(200, {'Content-Type': 'text/plain'});
+      res.write('Hello World!');
+      res.end();
+    }).listen(process.env.PORT);
   })
   .catch(function(error) {
     console.log(error);

@@ -26,7 +26,6 @@ const keywords = [
 ];
 const rejectMessage = 'Invalid equation.';
 const util = require('util');
-const Markov = require('js-markov');
 const Twitter = require('twitter');
 
 // functions that do stuff
@@ -128,6 +127,26 @@ client.on('message', async message => {
         ':fast_forward: Time has begun to move again. :fast_forward:'
       );
     }, 11000);
+  }
+  
+  if (message.content.startsWith(prefix + "media")) {
+	const args = message.content.split(" ").splice(1).join(" ").split("/");
+	try {
+		const media_message = await client.guilds
+		.get(args[4])
+		.channels.get(args[5])
+		.fetchMessage(args[6]);
+		
+		let mediaurl;
+
+		try {
+			message.reply(media_message.attachments.array()[0].url);
+		} catch(err) {
+			message.reply(`I couldn't find a picture or video in the message.`);
+		}
+	} catch(error) {
+		message.reply(`the message format was invalid.`);
+	}
   }
 
   if (message.content.startsWith(prefix + 'help')) {
@@ -378,35 +397,6 @@ client.on('message', async message => {
         endowo[math.abs(math.round(math.random() * endowo.length - 1))]
     );
   }
-  
-	// markov generator
-	if(
-		message.content.startsWith(prefix + "grab") &&
-		message.author.id === config.owner
-	) {
-		let args = parseInt(message.content.split(' ').splice(1).join(' '));
-		let messages;
-		
-		if(isNaN(args)) {
-			args = 50;
-		}
-		
-		message.channel.fetchMessages({ limit: args }).then(m => {
-				let markov = new Markov();
-				messages = m.map(x => x.cleanContent);
-				markov.addStates(messages);
-				markov.train(100);
-				let markovString = markov.generateRandom() + " ";
-				function getRandomArbitrary(min, max) {
-					return Math.floor(Math.random() * (max - min) + min);
-				}
-				for(let i = 0; i < getRandomArbitrary(0, 1000); i++) {
-					markovString += markov.generateRandom() + " ";
-				}
-				message.channel.send(markovString.replace(/\b<@[a-zA-Z]*/,""));
-			}
-		)
-	}
 	
 	if(message.content.startsWith(prefix + "purge") && message.author.id === config.owner) {
 		let deleteCount = parseInt(message.content.split(' ').splice(1).join(' '));
@@ -670,7 +660,64 @@ client.on('message', async message => {
     fs.writeFileSync('./data/piper.json', JSON.stringify(piper));
     message.reply('successfully added piper.');
   }
+	
+	/*
+	// bit that makes the bot send messages between two discords
+	// checks if the message sender is the bot. we don't want it to be. Fuck he
+	if(message.author.id !== config.bot) {
+		// this is the code that sends messages between channels
+		if(talkchannels.includes(message.channel.id)) {
+			var urlRegex = /(\b(?:(?:https?)|(?:ftp)|(?:file)):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*(?:(?:\.jpg)|(?:\.jpeg)|(?:\.png)|(?:\.gif)))/ig;
+			var person = message.guild.member(message.author);
+			var roleposition = 0;
+			for(var i = 0; i < person.roles.array().length; i++) {
+				var lastrole = person.roles.array()[i];
+				
+				// assigning the role colour based on the users top role/name colour
+				if(lastrole.position > roleposition && lastrole.hexColor !== "#000000") {
+					roleposition = lastrole.position;
+					var rolecolour = lastrole.hexColor;
+				}
+			}
 
+			// this part grabs an image url from the message, either from
+			// attachment or the image url itself
+			if(message.attachments.array().length > 0) {
+				var embedurl = message.attachments.array()[0].url;
+			} else if(message.cleanContent.match(urlRegex) !== null) {
+				var embedurl = message.cleanContent.match(urlRegex)[0];
+			} else {
+				var embedurl = '';
+			}
+			if(person.nickname !== null) {
+				var crosslinkauthor = person.user.tag + " (" + person.nickname + ")";
+			} else {
+				var crosslinkauthor = person.user.tag;
+			}
+			
+			// make the message content without any duplications
+			var finalmessagecontent = message.cleanContent;
+			if(finalmessagecontent.includes(embedurl)) {
+				finalmessagecontent = message.cleanContent;
+			} else {
+				finalmessagecontent = message.cleanContent + " " + embedurl;
+			}
+			
+			var embed = new Discord.RichEmbed()
+			.setAuthor(crosslinkauthor, person.user.displayAvatarURL)
+			.setColor(rolecolour)
+			.setDescription(finalmessagecontent)
+			.setImage(embedurl)
+			.setFooter("Sent from #" + message.channel.name + " in " + message.guild.name);
+		
+			for(var j in talkchannels) {
+				if(talkchannels[j] !== message.channel.id) {
+					client.channels.get(talkchannels[j]).send({embed});
+				}
+			}
+		}
+	}*/
+	
   // this is the code for adding/removing them. it's so God Damn Short !
   if (
     message.content === prefix + 'addchannel talk' &&
